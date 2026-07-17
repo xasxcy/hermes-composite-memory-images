@@ -20,17 +20,20 @@ Honcho（Gate 2）、Graphiti（Gate 3）将来各加一个目录 + 一个 workf
 
 ## NAS 拉取
 
-构建完成后在 Actions run summary 里取 `digest`（`sha256:...`）。本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
+当前 Mem0 镜像 digest（首建 2026-07-17）：
+`sha256:eb1bc4099a9c396a94762e6d71ec5c5cb725347210748897696b60d25467bac8`
+
+本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
 
 ```sh
 # 1) 登录 GHCR（在 NAS root 环境；PAT 需 read:packages 权限，用 stdin 传入不落历史）
 echo "<GHCR_PAT>" | sudo -i docker login ghcr.io -u xasxcy --password-stdin
 
 # 2) 按 digest 拉取（比 tag 更可复现）
-sudo -i docker pull ghcr.io/xasxcy/hermes-mem0@sha256:<DIGEST>
+sudo -i docker pull ghcr.io/xasxcy/hermes-mem0@sha256:eb1bc4099a9c396a94762e6d71ec5c5cb725347210748897696b60d25467bac8
 
 # 3) 打回本地 tag 供 compose 使用（compose 里镜像名保持 hermes-mem0:2.0.12-42cf18c4）
-sudo -i docker tag ghcr.io/xasxcy/hermes-mem0@sha256:<DIGEST> hermes-mem0:2.0.12-42cf18c4
+sudo -i docker tag ghcr.io/xasxcy/hermes-mem0@sha256:eb1bc4099a9c396a94762e6d71ec5c5cb725347210748897696b60d25467bac8 hermes-mem0:2.0.12-42cf18c4
 ```
 
-若把 GHCR **包**（非仓库）设为 public，则跳过第 1 步免登录直接拉。
+若把 GHCR **包**（非仓库）设为 public，则跳过第 1 步免登录直接拉。之后 `cd /volume2/docker/hermes-composite-memory/mem0 && sudo -i docker compose up -d` 会直接用这个本地 tag，不再构建。
