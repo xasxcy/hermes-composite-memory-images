@@ -25,7 +25,7 @@ RUN git clone "${HONCHO_REPOSITORY}" honcho \
     && test "$(git rev-parse HEAD)" = "${HONCHO_COMMIT}"
 
 WORKDIR /src/honcho
-RUN uv sync --frozen --no-group dev \
+RUN uv sync --frozen --no-group dev --python /usr/local/bin/python \
     && test -x /app/.venv/bin/python \
     && /app/.venv/bin/python -c 'import src'
 
