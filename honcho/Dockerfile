@@ -11,6 +11,7 @@ COPY --from=uv /uv /bin/uv
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
     PATH="/app/.venv/bin:${PATH}"
 
 RUN apt-get update \
@@ -24,11 +25,13 @@ RUN git clone "${HONCHO_REPOSITORY}" honcho \
     && test "$(git rev-parse HEAD)" = "${HONCHO_COMMIT}"
 
 WORKDIR /src/honcho
-RUN uv sync --frozen --no-group dev
+RUN uv sync --frozen --no-group dev \
+    && test -x /app/.venv/bin/python \
+    && /app/.venv/bin/python -c 'import src'
 
 RUN addgroup --system app \
     && adduser --system --group app \
-    && chown -R app:app /src/honcho
+    && chown -R app:app /src/honcho /app
 
 USER app
 WORKDIR /src/honcho
