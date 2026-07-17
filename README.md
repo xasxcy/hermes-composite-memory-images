@@ -9,7 +9,7 @@ GitHub Actions 构建 Hermes 复合记忆后端的自定义镜像，推送到 GH
 | 目录 | 镜像 | tag | 说明 |
 |---|---|---|---|
 | `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.0.12-42cf18c4` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
-| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.0.12-5ad22840` | Honcho API + Deriver 共用镜像，base/uv digest 与源码 commit 钉住 |
+| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.0.12-5ad22840-jwtfix1` | Honcho API + Deriver 共用镜像，官方 commit 锁定并应用单一 JWT NumericDate 维护 patch |
 
 Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
@@ -18,6 +18,10 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 `mem0/Dockerfile` 是本仓库 CI 的构建源，必须与 vault 部署仓库 `hermes-composite-memory/deploy/mem0/Dockerfile` **逐字一致**（该仓库有 `tests/test_mem0_deploy_contract.py` 校验构建契约）。改任一处后两边同步并复核 SHA-256。当前 SHA：`9d3d76a4a22f69bf9a9f08e32fcabb0ecc3460b2afc72ef0cee2d16da038f28d`。
 
 镜像不 bake 任何秘密：runtime 的 `.env`（DB 密码、API key、JWT）全部在 NAS 侧注入，不进镜像也不进本仓库。
+
+## Honcho 维护 patch
+
+`honcho/patches/0001-jwt-expiry-numericdate.patch` 仅适用于固定的官方 commit `5ad22840d829878f9ac4d13e9538e5fef216c97e`：将 JWT `exp` 正规化为 RFC 7519 NumericDate，修复 ISO string 被 PyJWT 拒绝、numeric value 又被服务端二次 ISO 解析的缺陷。Dockerfile 在构建期先 `git apply --check`，再签发/验证一个短期 numeric-exp token；任一上游上下文漂移或语义回归都会 fail build。回退只需把 NAS Compose 的 `HONCHO_IMAGE_TAG` 改回 `3.0.12-5ad22840` 并使用此前固定 digest 的本地 tag。
 
 ## NAS 拉取
 

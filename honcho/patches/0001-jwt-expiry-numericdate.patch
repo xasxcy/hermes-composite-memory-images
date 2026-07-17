@@ -1,0 +1,39 @@
+diff --git a/src/security.py b/src/security.py
+--- a/src/security.py
++++ b/src/security.py
+@@ -42,6 +42,6 @@ class JWTParams(BaseModel):
+ 
+     t: str = Field(default_factory=utc_now_iso)
+-    exp: str | None = None
++    exp: int | str | None = None
+     ad: bool | None = None
+     w: str | None = None
+     p: str | None = None
+@@ -59,5 +59,10 @@ def create_jwt(params: JWTParams) -> str:
+     """Create a JWT from the given parameters."""
+     payload = {k: v for k, v in params.__dict__.items() if v is not None}
++    # RFC 7519 requires a NumericDate for `exp`; accept legacy ISO input at
++    # the API boundary but normalize it before PyJWT performs validation.
++    exp = payload.get("exp")
++    if isinstance(exp, str):
++        payload["exp"] = int(parse_datetime_iso(exp).timestamp())
+     if not settings.AUTH.JWT_SECRET:
+         raise ValueError("AUTH_JWT_SECRET is not set, cannot create JWT.")
+     return jwt.encode(
+@@ -119,9 +126,12 @@ def verify_jwt(token: str) -> JWTParams:
+         if "exp" in decoded:
+             params.exp = decoded["exp"]
+             if params.exp:
+-                exp_time = parse_datetime_iso(params.exp)
+-                current_time = datetime.datetime.now(datetime.timezone.utc)
+-                if exp_time < current_time:
+-                    raise AuthenticationException("JWT expired")
++                # NumericDate expiry is enforced by jwt.decode(). Keep ISO
++                # parsing only for legacy payloads that bypass it.
++                if isinstance(params.exp, str):
++                    exp_time = parse_datetime_iso(params.exp)
++                    current_time = datetime.datetime.now(datetime.timezone.utc)
++                    if exp_time < current_time:
++                        raise AuthenticationException("JWT expired")
+         if "ad" in decoded:
+             params.ad = decoded["ad"]
