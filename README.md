@@ -9,8 +9,9 @@ GitHub Actions 构建 Hermes 复合记忆后端的自定义镜像，推送到 GH
 | 目录 | 镜像 | tag | 说明 |
 |---|---|---|---|
 | `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.0.12-42cf18c4` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
+| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.0.12-5ad22840` | Honcho API + Deriver 共用镜像，base/uv digest 与源码 commit 钉住 |
 
-Honcho（Gate 2）、Graphiti（Gate 3）将来各加一个目录 + 一个 workflow job。
+Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
 ## 构建来源真源
 

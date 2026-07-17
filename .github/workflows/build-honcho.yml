@@ -1,0 +1,64 @@
+name: Build & Push Honcho image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'honcho/Dockerfile'
+      - '.github/workflows/build-honcho.yml'
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/xasxcy/hermes-honcho
+  IMAGE_TAG: 3.0.12-5ad22840
+  PYTHON_BASE_IMAGE: python:3.13-slim-bookworm@sha256:9d7f287598e1a5a978c015ee176d8216435aaf335ed69ac3c38dd1bbb10e8d64
+  UV_IMAGE: ghcr.io/astral-sh/uv:0.9.24@sha256:816fdce3387ed2142e37d2e56e1b1b97ccc1ea87731ba199dc8a25c04e4997c5
+  HONCHO_COMMIT: 5ad22840d829878f9ac4d13e9538e5fef216c97e
+
+jobs:
+  build:
+    name: Build Honcho server image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: honcho
+          file: honcho/Dockerfile
+          pull: true
+          push: true
+          provenance: false
+          build-args: |
+            PYTHON_BASE_IMAGE=${{ env.PYTHON_BASE_IMAGE }}
+            UV_IMAGE=${{ env.UV_IMAGE }}
+            HONCHO_COMMIT=${{ env.HONCHO_COMMIT }}
+          tags: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:cache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:cache,mode=max
+
+      - name: Publish pinned reference
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          echo "## Honcho image pushed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- tag: \`${IMAGE}:${IMAGE_TAG}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- digest: \`${DIGEST}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- pin (use this on NAS): \`${IMAGE}@${DIGEST}\`" >> "$GITHUB_STEP_SUMMARY"
