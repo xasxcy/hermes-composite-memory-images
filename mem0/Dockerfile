@@ -2,7 +2,7 @@ ARG PYTHON_BASE_IMAGE
 FROM ${PYTHON_BASE_IMAGE}
 
 ARG MEM0_REPOSITORY=https://github.com/mem0ai/mem0.git
-ARG MEM0_COMMIT=42cf18c4e6adb448e981aa1c7b55c1602b0cb670
+ARG MEM0_COMMIT=4debc58a83377b18be81ae1e5969a300736b2fac
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -21,12 +21,15 @@ RUN git clone "${MEM0_REPOSITORY}" mem0 \
 RUN PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 python -m pip install -r /src/mem0/server/requirements.txt \
     && PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 python -m pip install "psycopg[binary]" \
     && PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 python -m pip install /src/mem0 \
-    && python -c "import mem0; assert mem0.__version__ == '2.0.12', mem0.__version__" \
+    && python -c "import mem0; assert mem0.__version__ == '2.0.17', mem0.__version__" \
     && python -c "import psycopg; assert psycopg.pq.__impl__ in ('binary', 'c'), psycopg.pq.__impl__"
 
 WORKDIR /app
 RUN cp -a /src/mem0/server/. /app/ \
     && rm -rf /src/mem0/.git
+
+LABEL org.opencontainers.image.source="https://github.com/mem0ai/mem0" \
+      org.opencontainers.image.revision="${MEM0_COMMIT}"
 
 EXPOSE 8000
 
