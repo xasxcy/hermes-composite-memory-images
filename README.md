@@ -25,8 +25,9 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
 ## NAS 拉取
 
-当前 Mem0 镜像 digest（2026-08-16 升级，待本轮构建完成回填；示例命令里的旧 digest 仅作格式参考，拉取前务必以 `dispatch/2026-08-16_hermes-memory-upgrade/UPGRADE-MANIFEST.md` 「构建产物」表为准）：
-`sha256:<待回填>`
+当前镜像 digest（2026-08-16 升级）：
+- Honcho: `sha256:1a91042397ff43d11150f67296007c671d71e3cb3be85fbdcff9ef3ad4ede77a`
+- Mem0: `sha256:72194c196307936a3719aac35fd90324ec9c6fbf07698df8afc55602e4d3ef20`
 
 本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
 
@@ -35,10 +36,10 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 echo "<GHCR_PAT>" | sudo -i docker login ghcr.io -u xasxcy --password-stdin
 
 # 2) 按 digest 拉取（比 tag 更可复现）
-sudo -i docker pull ghcr.io/xasxcy/hermes-mem0@sha256:eb1bc4099a9c396a94762e6d71ec5c5cb725347210748897696b60d25467bac8
+sudo -i docker pull ghcr.io/xasxcy/hermes-mem0@sha256:72194c196307936a3719aac35fd90324ec9c6fbf07698df8afc55602e4d3ef20
 
-# 3) 打回本地 tag 供 compose 使用（compose 里镜像名保持 hermes-mem0:2.0.12-42cf18c4）
-sudo -i docker tag ghcr.io/xasxcy/hermes-mem0@sha256:eb1bc4099a9c396a94762e6d71ec5c5cb725347210748897696b60d25467bac8 hermes-mem0:2.0.12-42cf18c4
+# 3) 打回本地 tag 供 compose 使用（compose 里镜像名保持 hermes-mem0:2.0.18-001c2352）
+sudo -i docker tag ghcr.io/xasxcy/hermes-mem0@sha256:72194c196307936a3719aac35fd90324ec9c6fbf07698df8afc55602e4d3ef20 hermes-mem0:2.0.18-001c2352
 ```
 
 若把 GHCR **包**（非仓库）设为 public，则跳过第 1 步免登录直接拉。之后 `cd /volume2/docker/hermes-composite-memory/mem0 && sudo -i docker compose up -d` 会直接用这个本地 tag，不再构建。
