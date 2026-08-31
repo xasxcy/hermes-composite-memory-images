@@ -2,7 +2,7 @@ ARG PYTHON_BASE_IMAGE
 FROM ${PYTHON_BASE_IMAGE}
 
 ARG MEM0_REPOSITORY=https://github.com/mem0ai/mem0.git
-ARG MEM0_COMMIT=001c235229be8795e3834520467bd0d661ed8f34
+ARG MEM0_COMMIT=19cb89aff472325c707f64b2f34ae6afdbf7faf7
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -21,7 +21,7 @@ RUN git clone "${MEM0_REPOSITORY}" mem0 \
 RUN PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 python -m pip install -r /src/mem0/server/requirements.txt \
     && PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 python -m pip install "psycopg[binary]" \
     && PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10 python -m pip install /src/mem0 \
-    && python -c "import mem0; assert mem0.__version__ == '2.0.18', mem0.__version__" \
+    && python -c "import mem0; assert mem0.__version__ == '2.0.19', mem0.__version__" \
     && python -c "import psycopg; assert psycopg.pq.__impl__ in ('binary', 'c'), psycopg.pq.__impl__"
 
 WORKDIR /app

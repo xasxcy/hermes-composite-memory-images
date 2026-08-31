@@ -8,26 +8,26 @@ GitHub Actions 构建 Hermes 复合记忆后端的自定义镜像，推送到 GH
 
 | 目录 | 镜像 | tag | 说明 |
 |---|---|---|---|
-| `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.0.18-001c2352` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
-| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.0.12-44489797-jwtfix1` | Honcho API + Deriver 共用镜像，官方 commit 锁定并应用单一 JWT NumericDate 维护 patch |
+| `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.0.19-19cb89af` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
+| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.1.0-82a92429-jwtfix1` | Honcho API + Deriver 共用镜像，官方 commit 锁定并应用单一 JWT NumericDate 维护 patch |
 
 Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
 ## 构建来源真源
 
-`mem0/Dockerfile` 是本仓库 CI 的构建源，必须与 vault 部署仓库 `hermes-composite-memory/deploy/mem0/Dockerfile` **逐字一致**（该仓库有 `tests/test_mem0_deploy_contract.py` 校验构建契约）。改任一处后两边同步并复核 SHA-256。当前 SHA（2026-08-16）：`ddc14659dd76ce30dbebded092f0ccb69fce56966d4cfc2168d11959a070335a`。
+`mem0/Dockerfile` 是本仓库 CI 的构建源，必须与 vault 部署仓库 `hermes-composite-memory/deploy/mem0/Dockerfile` **逐字一致**（该仓库有 `tests/test_mem0_deploy_contract.py` 校验构建契约）。改任一处后两边同步并复核 SHA-256。当前 SHA（2026-08-31）：`89e296765dc2e01b84896374fb82923329a68e61d9de55f348d6c7fc6dd02e53`。
 
 镜像不 bake 任何秘密：runtime 的 `.env`（DB 密码、API key、JWT）全部在 NAS 侧注入，不进镜像也不进本仓库。
 
 ## Honcho 维护 patch
 
-`honcho/patches/0001-jwt-expiry-numericdate.patch` 目前钉在官方 commit `444897975c95393b0d48024470ece03c025d3aa4`（2026-08-16 升级，`src/security.py` 自上一轮 `d191c107` 起零改动，patch 上下文未漂移）：将 JWT `exp` 正规化为 RFC 7519 NumericDate，修复 ISO string 被 PyJWT 拒绝、numeric value 又被服务端二次 ISO 解析的缺陷。Dockerfile 在构建期先 `git apply --check`，再签发/验证一个短期 numeric-exp token；任一上游上下文漂移或语义回归都会 fail build。回退只需把 NAS Compose 的 `HONCHO_IMAGE_TAG` 改回上一个已验证 tag（本轮之前是 `3.0.11-d191c107-jwtfix1`，回滚锚点见 vault `UPGRADE-MANIFEST.md`）并使用对应固定 digest 的本地 tag。
+`honcho/patches/0001-jwt-expiry-numericdate.patch` 目前钉在官方 commit `82a92429b888727b2236820b863256067c7edc80`（2026-08-31 升级 3.0.12→3.1.0，`git apply --check` 实测通过，三块以行偏移 +15/+15/-4 干净套用，`src/security.py` 关键符号 create_jwt/verify_jwt/JWTParams 均在）：将 JWT `exp` 正规化为 RFC 7519 NumericDate，修复 ISO string 被 PyJWT 拒绝、numeric value 又被服务端二次 ISO 解析的缺陷。Dockerfile 在构建期先 `git apply --check`，再签发/验证一个短期 numeric-exp token；任一上游上下文漂移或语义回归都会 fail build。回退只需把 NAS Compose 的 `HONCHO_IMAGE_TAG` 改回上一个已验证 tag（本轮之前是 `3.0.12-44489797-jwtfix1`，回滚锚点见 vault `UPGRADE-MANIFEST.md`）并使用对应固定 digest 的本地 tag。
 
 ## NAS 拉取
 
-当前镜像 digest（2026-08-16 升级）：
-- Honcho: `sha256:1a91042397ff43d11150f67296007c671d71e3cb3be85fbdcff9ef3ad4ede77a`
-- Mem0: `sha256:72194c196307936a3719aac35fd90324ec9c6fbf07698df8afc55602e4d3ef20`
+当前镜像 digest（2026-08-31 升级，待 GH Actions 构建后回填）：
+- Honcho: `sha256:<PENDING>`
+- Mem0: `sha256:<PENDING>`
 
 本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
 
@@ -36,10 +36,10 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 echo "<GHCR_PAT>" | sudo -i docker login ghcr.io -u xasxcy --password-stdin
 
 # 2) 按 digest 拉取（比 tag 更可复现）
-sudo -i docker pull ghcr.io/xasxcy/hermes-mem0@sha256:72194c196307936a3719aac35fd90324ec9c6fbf07698df8afc55602e4d3ef20
+sudo -i docker pull ghcr.io/xasxcy/hermes-mem0@sha256:<MEM0_DIGEST>
 
-# 3) 打回本地 tag 供 compose 使用（compose 里镜像名保持 hermes-mem0:2.0.18-001c2352）
-sudo -i docker tag ghcr.io/xasxcy/hermes-mem0@sha256:72194c196307936a3719aac35fd90324ec9c6fbf07698df8afc55602e4d3ef20 hermes-mem0:2.0.18-001c2352
+# 3) 打回本地 tag 供 compose 使用（compose 里镜像名保持 hermes-mem0:2.0.19-19cb89af）
+sudo -i docker tag ghcr.io/xasxcy/hermes-mem0@sha256:<MEM0_DIGEST> hermes-mem0:2.0.19-19cb89af
 ```
 
 若把 GHCR **包**（非仓库）设为 public，则跳过第 1 步免登录直接拉。之后 `cd /volume2/docker/hermes-composite-memory/mem0 && sudo -i docker compose up -d` 会直接用这个本地 tag，不再构建。
