@@ -25,8 +25,8 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
 ## NAS 拉取
 
-当前镜像 digest（2026-09-27 升级，GH Actions 构建产物，已在 NAS 拉取并核对 RepoDigest 一致）：
-- Honcho: `sha256:f4fb5fb5170c13a92595f1b0cf5f103d9fe15fdd0d94b802737f284afd6f449b`
+当前镜像 digest（2026-10-07 Honcho 升 3.2.2；Mem0 为 2026-09-27 的构建，GH Actions 构建产物，已在 NAS 拉取并核对 RepoDigest 一致）：
+- Honcho: `sha256:cb261d0e1fc9e144ee3e989caaa30247d2250712233e500345835b90a408056a`
 - Mem0: `sha256:4c06fbd2328ec831a776775a58bcaa4f3d95fb4df7d1fd3799e6c347f138617e`
 
 本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
