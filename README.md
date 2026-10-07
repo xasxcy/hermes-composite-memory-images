@@ -9,7 +9,7 @@ GitHub Actions 构建 Hermes 复合记忆后端的自定义镜像，推送到 GH
 | 目录 | 镜像 | tag | 说明 |
 |---|---|---|---|
 | `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.2.1-94c3fe9f` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
-| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.2.1-79cb3164-jwtfix1` | Honcho API + Deriver 共用镜像，官方 commit 锁定并应用单一 JWT NumericDate 维护 patch |
+| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.2.2-06ed1929-jwtfix1` | Honcho API + Deriver 共用镜像，官方 commit 锁定并应用单一 JWT NumericDate 维护 patch |
 
 Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
@@ -21,7 +21,7 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
 ## Honcho 维护 patch
 
-`honcho/patches/0001-jwt-expiry-numericdate.patch` 目前钉在官方 commit `79cb31645f4efdef626d1bd9316a648adb5da89b`（2026-09-27 升级 3.1.0→3.2.1，`git apply --check` 实测通过，三块以行偏移 +15/+15/-4 干净套用；上游本轮把 hunk 3 上下文里的 `datetime.datetime.now(datetime.timezone.utc)` 改成了 `datetime.datetime.now(datetime.UTC)`，patch 已同步跟随，逻辑不变）：将 JWT `exp` 正规化为 RFC 7519 NumericDate，修复 ISO string 被 PyJWT 拒绝、numeric value 又被服务端二次 ISO 解析的缺陷。Dockerfile 在构建期先 `git apply --check`，再签发/验证一个短期 numeric-exp token；任一上游上下文漂移或语义回归都会 fail build。回退只需把 NAS Compose 的 `HONCHO_IMAGE_TAG` 改回上一个已验证 tag（本轮之前是 `3.1.0-82a92429-jwtfix1`，回滚锚点见 vault `UPGRADE-MANIFEST.md`）并使用对应固定 digest 的本地 tag。
+`honcho/patches/0001-jwt-expiry-numericdate.patch` 目前钉在官方 commit `06ed1929cf017c333a87c41d130bb6a0605d91c0`（2026-10-07 升级 3.2.1→3.2.2，上游 `src/security.py` 本轮无改动，patch 原样适用；此前 2026-09-27 升级 3.1.0→3.2.1，`git apply --check` 实测通过，三块以行偏移 +15/+15/-4 干净套用；上游本轮把 hunk 3 上下文里的 `datetime.datetime.now(datetime.timezone.utc)` 改成了 `datetime.datetime.now(datetime.UTC)`，patch 已同步跟随，逻辑不变）：将 JWT `exp` 正规化为 RFC 7519 NumericDate，修复 ISO string 被 PyJWT 拒绝、numeric value 又被服务端二次 ISO 解析的缺陷。Dockerfile 在构建期先 `git apply --check`，再签发/验证一个短期 numeric-exp token；任一上游上下文漂移或语义回归都会 fail build。回退只需把 NAS Compose 的 `HONCHO_IMAGE_TAG` 改回上一个已验证 tag（本轮之前是 `3.1.0-82a92429-jwtfix1`，回滚锚点见 vault `UPGRADE-MANIFEST.md`）并使用对应固定 digest 的本地 tag。
 
 ## NAS 拉取
 
