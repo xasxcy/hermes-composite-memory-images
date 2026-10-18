@@ -4,7 +4,7 @@ FROM ${UV_IMAGE} AS uv
 FROM ${PYTHON_BASE_IMAGE}
 
 ARG HONCHO_REPOSITORY=https://github.com/plastic-labs/honcho.git
-ARG HONCHO_COMMIT=06ed1929cf017c333a87c41d130bb6a0605d91c0
+ARG HONCHO_COMMIT=608aec8a928da13c540262ed980c569448fb53ab
 
 COPY --from=uv /uv /bin/uv
 
@@ -19,19 +19,16 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
-COPY patches/ /tmp/honcho-patches/
 RUN git clone "${HONCHO_REPOSITORY}" honcho \
     && cd honcho \
     && git checkout --detach "${HONCHO_COMMIT}" \
-    && test "$(git rev-parse HEAD)" = "${HONCHO_COMMIT}" \
-    && git apply --check /tmp/honcho-patches/0001-jwt-expiry-numericdate.patch \
-    && git apply /tmp/honcho-patches/0001-jwt-expiry-numericdate.patch
+    && test "$(git rev-parse HEAD)" = "${HONCHO_COMMIT}"
 
 WORKDIR /src/honcho
 RUN uv sync --frozen --no-group dev --python /usr/local/bin/python \
     && test -x /app/.venv/bin/python \
     && /app/.venv/bin/python -c 'import src' \
-    && AUTH_JWT_SECRET=01234567890123456789012345678901 /app/.venv/bin/python -c 'import time; from src.security import JWTParams, create_jwt, verify_jwt; token = create_jwt(JWTParams(exp=int(time.time()) + 60)); assert isinstance(verify_jwt(token).exp, int)'
+    && AUTH_JWT_SECRET=01234567890123456789012345678901 /app/.venv/bin/python -c 'import datetime as d, unittest; from src.exceptions import AuthenticationException as E; from src.security import JWTParams as P, create_jwt as c, verify_jwt as v; n=d.datetime.now(d.UTC); v(c(P(ad=True, exp=n+d.timedelta(seconds=60)))); unittest.TestCase().assertRaisesRegex(E, "expired", v, c(P(ad=True, exp=n-d.timedelta(seconds=60))))'
 
 RUN addgroup --system app \
     && adduser --system --group app \
