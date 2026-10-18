@@ -26,7 +26,7 @@ Honcho `v3.3.0`（`608aec8a928da13c540262ed980c569448fb53ab`）已原生处理 J
 ## NAS 拉取
 
 当前镜像 digest（Honcho v3.3.0 尚未构建；Mem0 为 2026-09-27 的构建）：
-- Honcho: 待 GitHub Actions 构建后填写 v3.3.0 的 digest
+- Honcho: `sha256:e7e8ace457ec64c38fcfb3ea2b63dd64bb28ec778490da3d05442ba5a1bd300d`（v3.3.0，`608aec8a`；2026-10-18 GH Actions run 39130365424 构建，NAS `docker pull` 后 RepoDigest 一致，OCI `image.revision` 标签 = 冻结 SHA；当前生产在跑）
 - Mem0: `sha256:4c06fbd2328ec831a776775a58bcaa4f3d95fb4df7d1fd3799e6c347f138617e`
 
 本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
