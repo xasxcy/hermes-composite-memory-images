@@ -9,7 +9,7 @@ GitHub Actions 构建 Hermes 复合记忆后端的自定义镜像，推送到 GH
 | 目录 | 镜像 | tag | 说明 |
 |---|---|---|---|
 | `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.2.1-94c3fe9f` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
-| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.3.0-608aec8a` | Honcho API + Deriver 共用镜像，官方 commit 锁定并在构建期验证上游 JWT NumericDate 行为 |
+| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.5.0-0cd37ddb` | Honcho API + Deriver 共用镜像，官方 commit 锁定并在构建期验证上游 JWT NumericDate 行为 |
 
 Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
@@ -21,12 +21,12 @@ Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
 ## Honcho JWT 验证
 
-Honcho `v3.3.0`（`608aec8a928da13c540262ed980c569448fb53ab`）已原生处理 JWT NumericDate，因此旧维护 patch 已退休。Dockerfile 在构建期用上游真实代码签发两枚 token：未来 `exp` 必须验证通过，过去 `exp` 必须抛 `AuthenticationException("JWT expired")`；上游的 NumericDate 往返或过期语义回归会使构建失败（2026-10-18 已用 v3.3.0 源码实测，并做过反例对照）。回退使用 NAS 上同一时间点创建的 `hermes-honcho:rollback-<timestamp>` 本地标签，或上一个已验证的固定 digest。
+Honcho `v3.5.0`（`0cd37ddbd88f51cdac7c660d7372f4b2fd40a4b3`）沿用上游原生 JWT NumericDate，因此旧维护 patch 已退休。Dockerfile 在构建期用上游真实代码签发两枚 token：未来 `exp` 必须验证通过，过去 `exp` 必须抛 `AuthenticationException("JWT expired")`；上游的 NumericDate 往返或过期语义回归会使构建失败（2026-10-18 已用 v3.3.0 源码实测并做过反例对照；2026-11-01 用 uv 0.9.24 在 v3.5.0 上 frozen 安装并复跑同一探针，PROBE OK）。回退使用 NAS 上同一时间点创建的 `hermes-honcho:rollback-<timestamp>` 本地标签，或上一个已验证的固定 digest。
 
 ## NAS 拉取
 
 当前镜像 digest（Honcho v3.3.0 尚未构建；Mem0 为 2026-09-27 的构建）：
-- Honcho: `sha256:e7e8ace457ec64c38fcfb3ea2b63dd64bb28ec778490da3d05442ba5a1bd300d`（v3.3.0，`608aec8a`；2026-10-18 GH Actions run 39130365424 构建，NAS `docker pull` 后 RepoDigest 一致，OCI `image.revision` 标签 = 冻结 SHA；当前生产在跑）
+- Honcho（v3.3.0 上一版，回退参考）: `sha256:e7e8ace457ec64c38fcfb3ea2b63dd64bb28ec778490da3d05442ba5a1bd300d`（v3.3.0，`608aec8a`；2026-10-18 GH Actions run 39130365424 构建，NAS `docker pull` 后 RepoDigest 一致，OCI `image.revision` 标签 = 冻结 SHA；当前生产在跑）
 - Mem0: `sha256:4c06fbd2328ec831a776775a58bcaa4f3d95fb4df7d1fd3799e6c347f138617e`
 
 本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
