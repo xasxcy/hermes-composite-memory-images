@@ -11,10 +11,10 @@ on:
 
 env:
   IMAGE: ghcr.io/xasxcy/hermes-honcho
-  IMAGE_TAG: 3.3.0-608aec8a
+  IMAGE_TAG: 3.5.0-0cd37ddb
   PYTHON_BASE_IMAGE: python:3.13-slim-bookworm@sha256:00faa2debb87529f9f0764e9491d8ba400a3678976616c3bd7cb193745ac20d1
   UV_IMAGE: ghcr.io/astral-sh/uv:0.9.24@sha256:816fdce3387ed2142e37d2e56e1b1b97ccc1ea87731ba199dc8a25c04e4997c5
-  HONCHO_COMMIT: 608aec8a928da13c540262ed980c569448fb53ab
+  HONCHO_COMMIT: 0cd37ddbd88f51cdac7c660d7372f4b2fd40a4b3
 
 jobs:
   build:

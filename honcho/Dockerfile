@@ -4,7 +4,7 @@ FROM ${UV_IMAGE} AS uv
 FROM ${PYTHON_BASE_IMAGE}
 
 ARG HONCHO_REPOSITORY=https://github.com/plastic-labs/honcho.git
-ARG HONCHO_COMMIT=608aec8a928da13c540262ed980c569448fb53ab
+ARG HONCHO_COMMIT=0cd37ddbd88f51cdac7c660d7372f4b2fd40a4b3
 
 COPY --from=uv /uv /bin/uv
 
