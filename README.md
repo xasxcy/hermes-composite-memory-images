@@ -25,8 +25,9 @@ Honcho `v3.5.0`（`0cd37ddbd88f51cdac7c660d7372f4b2fd40a4b3`）沿用上游原�
 
 ## NAS 拉取
 
-当前镜像 digest（Honcho v3.3.0 尚未构建；Mem0 为 2026-09-27 的构建）：
-- Honcho（v3.3.0 上一版，回退参考）: `sha256:e7e8ace457ec64c38fcfb3ea2b63dd64bb28ec778490da3d05442ba5a1bd300d`（v3.3.0，`608aec8a`；2026-10-18 GH Actions run 39130365424 构建，NAS `docker pull` 后 RepoDigest 一致，OCI `image.revision` 标签 = 冻结 SHA；当前生产在跑）
+当前镜像 digest（Honcho 为 v3.5.0；Mem0 为 2026-09-27 的构建）：
+- Honcho（当前，v3.5.0）: `sha256:ca541957ac6e7ba08c6d5f1588d33263054f6d3dc00a30a917808d8d322571b1`（`0cd37ddb`，tag `3.5.0-0cd37ddb`；NAS 2026-11-01 上线，api 与 deriver 同一镜像）。注意：迁移执行后只改 tag 回退 3.3.0 会因 alembic 不认新 revision 而启动失败。
+- Honcho（v3.3.0 上一版，仅作参考，迁移后不能直接回退）: `sha256:e7e8ace457ec64c38fcfb3ea2b63dd64bb28ec778490da3d05442ba5a1bd300d`（v3.3.0，`608aec8a`；2026-10-18 GH Actions run 39130365424 构建，NAS `docker pull` 后 RepoDigest 一致，OCI `image.revision` 标签 = 冻结 SHA；当前生产在跑）
 - Mem0: `sha256:4c06fbd2328ec831a776775a58bcaa4f3d95fb4df7d1fd3799e6c347f138617e`
 
 本仓库私有 → GHCR 包默认私有，NAS 拉取需先登录：
