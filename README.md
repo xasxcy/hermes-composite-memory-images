@@ -9,7 +9,7 @@ GitHub Actions 构建 Hermes 复合记忆后端的自定义镜像，推送到 GH
 | 目录 | 镜像 | tag | 说明 |
 |---|---|---|---|
 | `mem0/` | `ghcr.io/xasxcy/hermes-mem0` | `2.2.1-94c3fe9f` | Mem0 self-hosted REST server，base digest 钉住 + 源码 commit 锁定 |
-| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.5.0-0cd37ddb` | Honcho API + Deriver 共用镜像，官方 commit 锁定并在构建期验证上游 JWT NumericDate 行为 |
+| `honcho/` | `ghcr.io/xasxcy/hermes-honcho` | `3.5.0-0cd37ddb-uv0.13.8` | Honcho API + Deriver 共用镜像，官方 commit 锁定并在构建期验证上游 JWT NumericDate 行为 |
 
 Graphiti（Gate 3）将来再加一个目录 + 一个 workflow job。
 
@@ -26,7 +26,8 @@ Honcho `v3.5.0`（`0cd37ddbd88f51cdac7c660d7372f4b2fd40a4b3`）沿用上游原�
 ## NAS 拉取
 
 当前镜像 digest（Honcho 为 v3.5.0；Mem0 为 2026-09-27 的构建）：
-- Honcho（当前，v3.5.0）: `sha256:ca541957ac6e7ba08c6d5f1588d33263054f6d3dc00a30a917808d8d322571b1`（`0cd37ddb`，tag `3.5.0-0cd37ddb`；NAS 2026-11-01 上线，api 与 deriver 同一镜像）。注意：迁移执行后只改 tag 回退 3.3.0 会因 alembic 不认新 revision 而启动失败。
+- Honcho（当前，v3.5.0 + uv 0.13.8）: `sha256:b5fa2270277b335737f0ed5fc851ab6afd08ee6f34cce72d15b951296052546e`（`0cd37ddb`，tag `3.5.0-0cd37ddb-uv0.13.8`；2026-11-14 GH Actions run 43548067436 构建，基础镜像 `ghcr.io/astral-sh/uv:0.13.8@sha256:5cc1805e…bac85`；NAS 同日上线，api 与 deriver 同一镜像，Image ID `d3375f418949`）。
+- Honcho（v3.5.0 + uv 0.9.24，上一版，可直接回退：应用 commit 与 schema 均未变）: `sha256:ca541957ac6e7ba08c6d5f1588d33263054f6d3dc00a30a917808d8d322571b1`（tag `3.5.0-0cd37ddb`，NAS 本地锚点 `hermes-honcho:rollback-20261114T105354`，Image ID `cd53a6741094`；2026-11-01 至 11-14 生产在跑）。注意：迁移执行后只改 tag 回退 3.3.0 会因 alembic 不认新 revision 而启动失败。
 - Honcho（v3.3.0 上一版，仅作参考，迁移后不能直接回退）: `sha256:e7e8ace457ec64c38fcfb3ea2b63dd64bb28ec778490da3d05442ba5a1bd300d`（v3.3.0，`608aec8a`；2026-10-18 GH Actions run 39130365424 构建，NAS `docker pull` 后 RepoDigest 一致，OCI `image.revision` 标签 = 冻结 SHA；当前生产在跑）
 - Mem0: `sha256:4c06fbd2328ec831a776775a58bcaa4f3d95fb4df7d1fd3799e6c347f138617e`
 
